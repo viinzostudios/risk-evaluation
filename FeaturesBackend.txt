@@ -1,0 +1,62 @@
+Contexto
+En una entidad financiera estamos desarrollando una nueva plataforma para la gestión de transferencias. Cada vez que un cliente realiza una transferencia, la solicitud debe ser validada por un microservicio de control de riesgo, que decide si se acepta o rechaza la operación según ciertos criterios.
+________________________________________
+Stack Tecnológico
+•	.NET 8
+•	Base de datos relacional (SQL Server)
+•	Kafka
+•	Docker
+________________________________________
+Requisitos Funcionales
+1. Crear una solicitud de transferencia
+Debes exponer un endpoint POST /api/payments que permita registrar una solicitud de pago con el siguiente payload:
+{
+  "customerId": "cfe8b150-2f84-4a1a-bdf4-923b20e34973",
+  "serviceProviderId": "5fa3ab5c-645f-4cd5-b29e-5c5c116d7ea4",
+  "paymentMethodId": 2,
+  "amount": 150.00
+}
+•	El sistema debe generar internamente un externalOperationId de tipo GUID.
+•	El estado inicial de la operación debe ser evaluating.
+•	Debe enviarse un mensaje a Kafka en el tópico risk-evaluation-request con el siguiente contenido:
+{
+  "externalOperationId": "2a7fb0cd-4c1c-4e6e-b8f9-ef83bb14cf23",
+  "customerId": "cfe8b150-2f84-4a1a-bdf4-923b20e34973",
+  "amount": 150.00
+}
+2. Recibir resultado de evaluación de riesgo
+Implementa un consumidor Kafka que escuche el tópico risk-evaluation-response y procese mensajes con la siguiente estructura:
+{
+  "externalOperationId": "2a7fb0cd-4c1c-4e6e-b8f9-ef83bb14cf23",
+  "status": "accepted"
+}
+•	El sistema debe actualizar el estado de la operación a accepted o denied según el mensaje recibido.
+•	Se recomienda almacenar un campo updatedAt para reflejar la fecha de la última modificación.
+3. Consultar el estado de una operación de pago
+Debes exponer un endpoint GET /api/payments/{externalOperationId} que devuelva la información de la operación:
+{
+  "externalOperationId": "2a7fb0cd-4c1c-4e6e-b8f9-ef83bb14cf23",
+  "createdAt": "2025-07-17T08:15:30Z",
+  "status": "accepted"
+}
+________________________________________
+Reglas de Negocio para el servicio de riesgo
+Puedes simular el microservicio de evaluación de riesgo como un componente adicional que responde automáticamente según las siguientes reglas:
+•	Cualquier operación con un amount > 2000 Bs debe ser rechazada.
+•	Si el acumulado diario de pagos de un mismo customerId supera los 5,000 Bs, las siguientes operaciones deben ser rechazadas.
+•	Si ninguna de estas condiciones se cumple, la operación debe ser aceptada.
+Este microservicio puede funcionar como una tarea programada, un simulador en memoria, o un backend adicional expuesto por ti mismo.
+________________________________________
+Documentación esperada
+Incluye en tu entrega:
+•	Instrucciones claras en un archivo README.md para correr el proyecto con Docker.
+•	Scripts o migraciones para la base de datos.
+•	Endpoints documentados (puedes usar Swagger o Postman).
+•	Código organizado según buenas prácticas de arquitectura (clean, hexagonal, etc.).
+________________________________________
+Entrega
+enviar la solución:
+•	Repositorio en GitHub, GitLab o Bitbucket.
+•	Archivo .zip comprimido con el proyecto completo.
+
+
