@@ -25,6 +25,12 @@ public class PaymentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentRequest request, CancellationToken cancellationToken)
     {
+        if (!ModelState.IsValid)
+        {
+            _logger.LogWarning("Invalid payment request received");
+            return BadRequest(ModelState);
+        }
+
         _logger.LogInformation("Creating payment for CustomerId: {CustomerId}, Amount: {Amount}",
             request.CustomerId, request.Amount);
 
