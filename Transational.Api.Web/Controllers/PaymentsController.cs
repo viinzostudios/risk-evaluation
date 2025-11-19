@@ -28,11 +28,6 @@ public class PaymentsController : ControllerBase
         _logger.LogInformation("Creating payment for CustomerId: {CustomerId}, Amount: {Amount}",
             request.CustomerId, request.Amount);
 
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
         var command = new CreatePaymentCommand(
             request.CustomerId,
             request.ServiceProviderId,
@@ -44,7 +39,7 @@ public class PaymentsController : ControllerBase
         if (result.IsFailure)
         {
             _logger.LogError("Failed to create payment: {Error}", result.Error);
-            return BadRequest(new { error = result.Error });
+            return BadRequest(new { message = "Failed to create payment", error = result.Error });
         }
 
         _logger.LogInformation("Payment created successfully with ExternalOperationId: {ExternalOperationId}",
@@ -56,7 +51,7 @@ public class PaymentsController : ControllerBase
             result.Value);
     }
 
-    [HttpGet("{externalOperationId}")]
+    [HttpGet("{externalOperationId:guid}")]
     [ProducesResponseType(typeof(PaymentResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetPayment(Guid externalOperationId, CancellationToken cancellationToken)
@@ -70,7 +65,10 @@ public class PaymentsController : ControllerBase
         if (result.IsFailure)
         {
             _logger.LogWarning("Payment not found: {ExternalOperationId}", externalOperationId);
-            return NotFound(new { error = result.Error });
+            return NotFound(new {
+                message = $"Payment with external operation ID '{externalOperationId}' not found",
+                externalOperationId
+            });
         }
 
         return Ok(result.Value);
