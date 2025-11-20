@@ -1,9 +1,9 @@
+using Application.DTOs;
 using AutoMapper;
 using MediatR;
-using Application.DTOs;
+using Microsoft.Extensions.Logging;
 using Transational.Api.Domain.Common;
 using Transational.Api.Domain.Interfaces;
-using KafkaClient.Service.Interfaces;
 
 namespace Application.Queries.GetPayment;
 
@@ -11,30 +11,41 @@ public class GetPaymentHandler : IRequestHandler<GetPaymentQuery, Result<Payment
 {
     private readonly IPaymentRepository _paymentRepository;
     private readonly IMapper _mapper;
-
-    public GetPaymentHandler(IPaymentRepository paymentRepository, IMapper mapper)
+    private readonly ILogger<GetPaymentHandler> _logger;
+    public GetPaymentHandler(IPaymentRepository paymentRepository, IMapper mapper, ILogger<GetPaymentHandler> logger)
     {
         _paymentRepository = paymentRepository;
         _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<Result<PaymentResponse>> Handle(
         GetPaymentQuery request,
         CancellationToken cancellationToken)
     {
-        // Get payment from database
-        var payment = await _paymentRepository.GetByExternalIdAsync(
-            request.ExternalOperationId,
-            cancellationToken);
-
-        if (payment == null)
+        try
         {
-            return Result<PaymentResponse>.NotFound("Payment not found");
+            _logger.LogInformation("Getting payment with ExternalOperationId: {ExternalOperationId}",
+                request.ExternalOperationId);
+
+            var payment = await _paymentRepository.GetByExternalIdAsync(
+                request.ExternalOperationId,
+                cancellationToken);
+
+            if (payment == null)
+            {
+                _logger.LogWarning("Payment not found: {ExternalOperationId}", request.ExternalOperationId);
+                return Result<PaymentResponse>.NotFound("Payment not found");
+            }
+
+            var response = _mapper.Map<PaymentResponse>(payment);
+
+            return Result.Success(response);
         }
-
-        // Map to response DTO
-        var response = _mapper.Map<PaymentResponse>(payment);
-
-        return Result.Success(response);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting payment");
+            return Result.Failure<PaymentResponse>(ex.Message);
+        }
     }
 }

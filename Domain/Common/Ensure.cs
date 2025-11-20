@@ -1,8 +1,5 @@
 namespace Transational.Api.Domain.Common;
 
-/// <summary>
-/// Guard clauses for domain validation
-/// </summary>
 public static class Ensure
 {
     public static void NotNull<T>(T value, string parameterName) where T : class

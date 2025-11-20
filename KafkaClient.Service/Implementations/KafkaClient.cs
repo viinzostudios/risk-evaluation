@@ -5,8 +5,6 @@ using KafkaClient.Service.Interfaces;
 
 namespace KafkaClient.Service.Implementations
 {
-    
-
     public class KafkaClient : IKafkaClient
     {
         private readonly KafkaSettings _settings;
@@ -17,7 +15,6 @@ namespace KafkaClient.Service.Implementations
         {
             _settings = settings.Value;
 
-            // Config Producer
             var producerConfig = new ProducerConfig
             {
                 BootstrapServers = _settings.BootstrapServers
@@ -25,7 +22,6 @@ namespace KafkaClient.Service.Implementations
 
             _producer = new ProducerBuilder<string, string>(producerConfig).Build();
 
-            // Config Consumer
             var consumerConfig = new ConsumerConfig
             {
                 BootstrapServers = _settings.BootstrapServers,
@@ -37,7 +33,6 @@ namespace KafkaClient.Service.Implementations
             _consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
         }
 
-        // -------- PUBLISH ----------
         public async Task PublishAsync<T>(string topic, T message)
         {
             var json = System.Text.Json.JsonSerializer.Serialize(message);
@@ -49,13 +44,11 @@ namespace KafkaClient.Service.Implementations
             });
         }
 
-        // -------- SUBSCRIBE (1 Topic) ----------
         public void Subscribe(string topic, Action<string, string> handler)
         {
             Subscribe(new List<string> { topic }, handler);
         }
 
-        // -------- SUBSCRIBE (Multiple Topics) ----------
         public void Subscribe(IEnumerable<string> topics, Action<string, string> handler)
         {
             _consumer.Subscribe(topics);

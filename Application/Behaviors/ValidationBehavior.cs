@@ -36,12 +36,10 @@ public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TReques
         {
             var errors = string.Join(", ", failures.Select(f => f.ErrorMessage));
 
-            // Si TResponse es Result<T>, retornar un Result.Failure
             if (typeof(TResponse).IsGenericType && typeof(TResponse).GetGenericTypeDefinition() == typeof(Result<>))
             {
                 var resultType = typeof(TResponse).GetGenericArguments()[0];
 
-                // Llamar al método estático Result.Failure<T>(string error) de la clase base
                 var failureMethod = typeof(Result)
                     .GetMethod(nameof(Result.Failure), 1, new[] { typeof(string) });
 

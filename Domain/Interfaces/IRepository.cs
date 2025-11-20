@@ -2,9 +2,6 @@ using Transational.Api.Domain.Common;
 
 namespace Transational.Api.Domain.Interfaces;
 
-/// <summary>
-/// Generic repository interface for domain entities
-/// </summary>
 public interface IRepository<T> where T : EntityBase
 {
     Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default);

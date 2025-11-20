@@ -1,8 +1,5 @@
 namespace Transational.Api.Domain.Common;
 
-/// <summary>
-/// Represents the result of an operation
-/// </summary>
 public class Result
 {
     public bool IsSuccess { get; }
@@ -28,9 +25,6 @@ public class Result
     public static Result<T> Failure<T>(string error) => new(default, false, error);
 }
 
-/// <summary>
-/// Represents the result of an operation with a value
-/// </summary>
 public class Result<T> : Result
 {
     public T Value { get; }

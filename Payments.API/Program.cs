@@ -3,18 +3,11 @@ using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-// Application Layer (MediatR, AutoMapper)
 builder.Services.AddApplication();
-
-// Infrastructure Layer (DbContext, Repositories)
 builder.Services.AddInfrastructure(builder.Configuration);
-
-// Controllers
 builder.Services.AddControllers();
-
-// CORS
+builder.Services.AddEndpointsApiExplorer(); 
+builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -27,14 +20,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
-
 app.UseCors("AllowAll");
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

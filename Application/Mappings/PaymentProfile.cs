@@ -9,7 +9,6 @@ public class PaymentProfile : Profile
 {
     public PaymentProfile()
     {
-        // CreatePaymentCommand → Payment entity
         CreateMap<CreatePaymentCommand, Payment>()
             .ForMember(dest => dest.CustomerId,
                 opt => opt.MapFrom(src => src.CustomerId.ToByteArray()))
@@ -27,7 +26,6 @@ public class PaymentProfile : Profile
             .ForMember(dest => dest.PaymentMethod, opt => opt.Ignore())
             .ForMember(dest => dest.PaymentStatus, opt => opt.Ignore());
 
-        // Payment entity → PaymentResponse DTO
         CreateMap<Payment, PaymentResponse>()
             .ForMember(dest => dest.ExternalOperationId,
                 opt => opt.MapFrom(src => new Guid(src.ExternalOperationId)))

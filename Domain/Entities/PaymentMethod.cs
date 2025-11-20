@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Transational.Api.Domain.Entities;
+﻿namespace Transational.Api.Domain.Entities;
 
 public partial class PaymentMethod
 {
