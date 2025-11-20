@@ -1,0 +1,6 @@
+@Payments.Api = http://localhost:5107
+
+GET {{Payments.Api}}/swagger/
+Accept: application/json
+
+###
