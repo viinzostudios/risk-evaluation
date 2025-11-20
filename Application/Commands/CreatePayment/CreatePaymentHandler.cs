@@ -1,6 +1,7 @@
-using AutoMapper;
-using MediatR;
 using Application.DTOs;
+using AutoMapper;
+using KafkaClient.Service.Interfaces;
+using MediatR;
 using Transational.Api.Domain.Common;
 using Transational.Api.Domain.Entities;
 using Transational.Api.Domain.Interfaces;
@@ -11,11 +12,13 @@ public class CreatePaymentHandler : IRequestHandler<CreatePaymentCommand, Result
 {
     private readonly IPaymentRepository _paymentRepository;
     private readonly IMapper _mapper;
+    private readonly IKafkaClient _kafkaClient;
 
-    public CreatePaymentHandler(IPaymentRepository paymentRepository, IMapper mapper)
+    public CreatePaymentHandler(IPaymentRepository paymentRepository, IMapper mapper, IKafkaClient kafkaClient)
     {
         _paymentRepository = paymentRepository;
         _mapper = mapper;
+        _kafkaClient = kafkaClient;
     }
 
     public async Task<Result<PaymentResponse>> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
@@ -28,6 +31,8 @@ public class CreatePaymentHandler : IRequestHandler<CreatePaymentCommand, Result
 
         var createdPayment = await _paymentRepository.AddAsync(payment, cancellationToken);
         var response = _mapper.Map<PaymentResponse>(createdPayment);
+
+        await _kafkaClient.PublishAsync("", new { });
 
         return Result.Success(response);
     }

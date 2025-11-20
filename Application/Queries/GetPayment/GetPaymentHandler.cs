@@ -3,6 +3,7 @@ using MediatR;
 using Application.DTOs;
 using Transational.Api.Domain.Common;
 using Transational.Api.Domain.Interfaces;
+using KafkaClient.Service.Interfaces;
 
 namespace Application.Queries.GetPayment;
 

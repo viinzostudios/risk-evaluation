@@ -1,9 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Transational.Api.Domain.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
+using kcs = KafkaClient.Service.Implementations;
+using KafkaClient.Service.Interfaces;
+using KafkaClient.Service;
 
 namespace Infrastructure;
 
@@ -23,6 +27,8 @@ public static class DependencyInjection
         // Repositories
         services.AddScoped<IPaymentRepository, PaymentRepository>();
 
+        services.Configure<KafkaSettings>(configuration.GetSection("KafkaSettings"));
+        services.AddSingleton<IKafkaClient, kcs.KafkaClient>();
         return services;
     }
 }
