@@ -31,7 +31,7 @@ public class PaymentRepository : IPaymentRepository
         return await _context.Payments
             .Include(p => p.PaymentStatus)
             .Include(p => p.PaymentMethod)
-            .Where(p => p.ExternalOperationId == customerIdBytes)
+            .Where(p => p.CustomerId == customerIdBytes)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync(cancellationToken);
     }
@@ -44,7 +44,7 @@ public class PaymentRepository : IPaymentRepository
 
 
         return await _context.Payments
-            .Where(p => p.ExternalOperationId == customerIdBytes)
+            .Where(p => p.CustomerId == customerIdBytes)
             .Where(p => p.CreatedAt >= startOfDay && p.CreatedAt <= endOfDay)
             .Where(p => p.PaymentStatusId == 2) // accepted
             .SumAsync(p => p.Amount, cancellationToken);

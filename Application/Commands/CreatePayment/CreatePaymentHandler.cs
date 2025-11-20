@@ -4,6 +4,7 @@ using Azure;
 using KafkaClient.Service.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System;
 using Transational.Api.Domain.Common;
 using Transational.Api.Domain.Entities;
 using Transational.Api.Domain.Interfaces;
@@ -31,14 +32,22 @@ public class CreatePaymentHandler : IRequestHandler<CreatePaymentCommand, Result
             _logger.LogInformation("Creating payment for CustomerId: {CustomerId}, Amount: {Amount}", request.CustomerId, request.Amount);
 
             var payment = _mapper.Map<Payment>(request);
-            payment.ExternalOperationId = Guid.NewGuid().ToByteArray();
+            var externalOperationId = Guid.NewGuid();
+            payment.ExternalOperationId = externalOperationId.ToByteArray();
             payment.PaymentStatusId = 1; // evaluating
             payment.CreatedAt = DateTime.UtcNow;
 
             var createdPayment = await _paymentRepository.AddAsync(payment, cancellationToken);
             var response = _mapper.Map<PaymentResponse>(createdPayment);
 
-            await _kafkaClient.PublishAsync("", new { });
+        var riskRequest = new RiskEvaluationRequest
+        {
+            ExternalOperationId = externalOperationId,
+            CustomerId = request.CustomerId,
+            Amount = request.Amount
+        };
+
+        await _kafkaClient.PublishAsync("risk-evaluation-request", riskRequest);
 
             _logger.LogInformation("Payment created successfully with ExternalOperationId: {ExternalOperationId}", response.ExternalOperationId);
             

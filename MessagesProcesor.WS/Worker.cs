@@ -1,24 +1,44 @@
+using Application.Commands.EvaluateRisk;
+using Application.Commands.UpdatePaymentStatus;
+using Application.DTOs;
+using Infrastructure.WS.Interfaces;
+using KafkaClient.Service.Interfaces;
+using MediatR;
+using System.Net;
+using System.Text.Json;
+using System.Threading;
+
 namespace MessagesProcesor.WS
 {
+
     public class Worker : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
-
-        public Worker(ILogger<Worker> logger)
+        private readonly IPaymentEvaluator _paymentEvaluator;
+        public Worker(IPaymentEvaluator paymentEvaluator)
         {
-            _logger = logger;
+            _paymentEvaluator = paymentEvaluator;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _paymentEvaluator.InitProcess();
+
+            // Keep the worker running
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (_logger.IsEnabled(LogLevel.Information))
+                if (!_paymentEvaluator.InProgress)
                 {
-                    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                    _paymentEvaluator.InitProcess();
                 }
-                await Task.Delay(1000, stoppingToken);
+
+                await Task.Delay(10000, stoppingToken);
             }
+        }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            _paymentEvaluator.StopProcess();
+            await base.StopAsync(cancellationToken);
         }
     }
 }
