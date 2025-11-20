@@ -21,4 +21,8 @@
     <ProjectReference Include="..\KafkaClient.Service\KafkaClient.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="WS\" />
+  </ItemGroup>
+
 </Project>
